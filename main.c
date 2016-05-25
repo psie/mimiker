@@ -11,6 +11,7 @@
 #include <rtc.h>
 #include <pci.h>
 #include "callout.h"
+#include "sleepq.h"
 
 typedef struct cpuinfo {
     int tlb_entries;
@@ -221,11 +222,13 @@ int kernel_main(int argc, char **argv, char **envp) {
 
   kmalloc_test();
 
+  sleepq_test();
+
 #if 0
   demo_ctx();
 #endif
 
-  callout_demo();
+  //callout_demo();
 
   int size = 0;
 
