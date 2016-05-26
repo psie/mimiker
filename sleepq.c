@@ -43,7 +43,8 @@ void sleepq_add(void *wchan, const char *wmesg, thread_t *td) {
   assert(LIST_EMPTY(&td->td_sleepqueue->sq_free));
   assert(td->td_sleepqueue->sq_nblocked == 0);
 
-
+  /* If a sleepq already exists for wchan, we insert this thread to it.
+     Otherwise use this thread's sleepq. */
   if (sq == NULL) {
     // We need to insert a new sleepq.
     sq = td->td_sleepqueue;
@@ -69,7 +70,7 @@ void sleepq_wait(void *wchan) {
   /* TODO SLEEP */
 }
 
-/* Remove a queue from the sleep queue and resume it */
+/* Remove a thread from the sleep queue and resume it */
 static void sleepq_resume_thread(sleepq_t *sq, thread_t *td) {
   log("Resuming thread from sleepq. *td: %p, *td_wchan: %p", td, td->td_wchan);
   assert(td->td_wchan != NULL);
@@ -79,17 +80,22 @@ static void sleepq_resume_thread(sleepq_t *sq, thread_t *td) {
   TAILQ_REMOVE(&sq->sq_blocked, td, td_sleepq_entry);
   sq->sq_nblocked--;
 
+  /* If it was the last thread on this sleepq, thread td gets this sleepq,
+     Otherwise thread td gets a sleepq from the free list. */
   if (TAILQ_EMPTY(&sq->sq_blocked)) {
     td->td_sleepqueue = sq;
     sq->sq_wchan = NULL;
     assert(sq->sq_nblocked == 0);
   } else {
+    assert(!LIST_EMPTY(&sq->sq_free));
     td->td_sleepqueue = LIST_FIRST(&sq->sq_free);
     assert(sq->sq_nblocked > 0);
   }
 
+  /* Either remove from the sleepqueue chain or the free list. */
   LIST_REMOVE(td->td_sleepqueue,
-              sq_entry); /* Either removes from the sleepqueue chain or free list. */
+              sq_entry);
+
   td->td_wchan = NULL;
   td->td_wmesg = NULL;
 
