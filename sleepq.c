@@ -142,7 +142,9 @@ void sleepq_remove(thread_t *td, void *wchan) {
   sleepq_resume_thread(sq, td);
 }
 
-void sleepq_test() {
+
+#ifdef _USERSPACE
+int main() {
   sleepq_init();
   thread_t t1, t2;
   sleepq_t sq1, sq2;
@@ -180,4 +182,7 @@ void sleepq_test() {
 
   sleepq_remove(&t1, wchan);
   sleepq_remove(&t2, wchan2);
+
+  return 0;
 }
+#endif // _USERSPACE

@@ -41,7 +41,7 @@
     _addr = (_addr + (_size - 1)) & -_size; \
     (typeof(addr))_addr; })
 
-#ifndef USERSPACE
+#ifndef _USERSPACE
 
 /* Terminate kernel. */
 void kernel_exit();
@@ -65,7 +65,13 @@ void kernel_exit();
 #endif
 
 #else
+
 #include <assert.h>
-#endif // USERSPACE
+#include <stdio.h>
+#define log(FMT, ...) __extension__ ({                                   \
+  printf("[%s:%d] " FMT "\n", __FILE__, __LINE__, ##__VA_ARGS__);       \
+})
+
+#endif // _USERSPACE
 
 #endif // __COMMON_H__
