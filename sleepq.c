@@ -1,7 +1,8 @@
 #include <common.h>
-#include "libkern.h"
-#include "sleepq.h"
-#include "thread.h"
+#include <queue.h>
+#include <libkern.h>
+#include <sleepq.h>
+#include <thread.h>
 
 #define SC_TABLESIZE    256 /* Must be power of 2. */
 #define SC_MASK         (SC_TABLESIZE - 1)
@@ -14,7 +15,7 @@ static sleepq_chain_t sleepq_chains[SC_TABLESIZE];
 
 void sleepq_init() {
   memset(sleepq_chains, 0, sizeof sleepq_chains);
-  for (int i = 0; i < SC_TABLESIZE; i++)
+  for (uint64_t i = 0; i < SC_TABLESIZE; i++)
     LIST_INIT(&sleepq_chains[i].sc_queues);
 }
 
@@ -33,8 +34,6 @@ sleepq_t *sleepq_lookup(void *wchan) {
 
 void sleepq_add(void *wchan, const char *wmesg, thread_t *td) {
   log("Adding a thread to the sleep queue. *td: %p, *wchan: %p", td, wchan);
-  sleepq_chain_t *sc = SC_LOOKUP(wchan);
-  sleepq_t *sq = sleepq_lookup(wchan);
 
   assert(td->td_wchan == NULL);
   assert(td->td_wmesg == NULL);
@@ -43,10 +42,13 @@ void sleepq_add(void *wchan, const char *wmesg, thread_t *td) {
   assert(LIST_EMPTY(&td->td_sleepqueue->sq_free));
   assert(td->td_sleepqueue->sq_nblocked == 0);
 
+  sleepq_chain_t *sc = SC_LOOKUP(wchan);
+  sleepq_t *sq = sleepq_lookup(wchan);
+
   /* If a sleepq already exists for wchan, we insert this thread to it.
      Otherwise use this thread's sleepq. */
   if (sq == NULL) {
-    // We need to insert a new sleepq.
+    /* We need to insert a new sleepq. */
     sq = td->td_sleepqueue;
     LIST_INSERT_HEAD(&sc->sc_queues, sq, sq_entry);
     sq->sq_wchan = wchan;
@@ -73,6 +75,7 @@ void sleepq_wait(void *wchan) {
 /* Remove a thread from the sleep queue and resume it */
 static void sleepq_resume_thread(sleepq_t *sq, thread_t *td) {
   log("Resuming thread from sleepq. *td: %p, *td_wchan: %p", td, td->td_wchan);
+
   assert(td->td_wchan != NULL);
   assert(td->td_sleepqueue == NULL);
   assert(sq->sq_nblocked >= 1);
@@ -101,7 +104,6 @@ static void sleepq_resume_thread(sleepq_t *sq, thread_t *td) {
 
   /* TODO Wake this thread up */
 }
-
 
 void sleepq_signal(void *wchan) {
   sleepq_t *sq = sleepq_lookup(wchan);

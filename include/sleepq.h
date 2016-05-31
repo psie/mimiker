@@ -2,7 +2,7 @@
 #define __SLEEPQ_H__
 
 #include <common.h>
-#include "thread.h"
+#include <queue.h>
 
 typedef struct thread thread_t;
 
