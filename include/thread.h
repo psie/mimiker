@@ -17,7 +17,7 @@ typedef struct stack {
 } stack_t;
 
 typedef struct thread {
-  TAILQ_ENTRY(thread) td_runq_entry;    /* a link on run queue */
+  TAILQ_ENTRY(thread) td_runq;    /* a link on run queue */
   TAILQ_ENTRY(thread) td_sleepq_entry;  /* a link on sleep queue */
   td_sched_t *td_sched;           /* scheduler-specific data */
   td_prio_t td_priority;

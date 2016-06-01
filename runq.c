@@ -12,7 +12,7 @@ void runq_init(runq_t *rq) {
 
 void runq_add(runq_t *rq, thread_t *td) {
   uint64_t priority = td->td_priority / RQ_PPQ;
-  TAILQ_INSERT_TAIL(&rq->rq_queues[priority], td, td_runq_entry);
+  TAILQ_INSERT_TAIL(&rq->rq_queues[priority], td, td_runq);
 }
 
 thread_t *runq_choose(runq_t *rq) {
@@ -29,7 +29,7 @@ thread_t *runq_choose(runq_t *rq) {
 
 void runq_remove(runq_t *rq, thread_t *td) {
   uint64_t priority = td->td_priority / RQ_PPQ;
-  TAILQ_REMOVE(&rq->rq_queues[priority], td, td_runq_entry);
+  TAILQ_REMOVE(&rq->rq_queues[priority], td, td_runq);
 }
 
 #ifdef _USERSPACE
