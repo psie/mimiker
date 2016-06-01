@@ -69,10 +69,10 @@ void sleepq_add(void *wchan, const char *wmesg, thread_t *td) {
 }
 
 void sleepq_wait(void *wchan) {
-  /* TODO SLEEP */
+  /* Here will be code that makes this thread go to sleep */
 }
 
-/* Remove a thread from the sleep queue and resume it */
+/* Remove a thread from the sleep queue and resume it. */
 static void sleepq_resume_thread(sleepq_t *sq, thread_t *td) {
   log("Resuming thread from sleepq. *td: %p, *td_wchan: %p", td, td->td_wchan);
 
@@ -102,16 +102,15 @@ static void sleepq_resume_thread(sleepq_t *sq, thread_t *td) {
   td->td_wchan = NULL;
   td->td_wmesg = NULL;
 
-  /* TODO Wake this thread up */
+  /* Here will be code that wakes this thread. */
 }
 
 void sleepq_signal(void *wchan) {
   sleepq_t *sq = sleepq_lookup(wchan);
 
-  /* Should it panic?
     if (sq == NULL)
-      panic("Trying to signal a wait channel that isn't in a sleep queue.");
-  */
+      panic("Trying to signal a wait channel that isn't in any sleep queue.");
+
   thread_t *current_td;
   thread_t *best_td = NULL;
 
@@ -125,7 +124,8 @@ void sleepq_signal(void *wchan) {
 
 void sleepq_broadcast(void *wchan) {
   sleepq_t *sq = sleepq_lookup(wchan);
-  // if (sq == NULL) Should it panic?
+  if (sq == NULL)
+    panic("Trying to broadcast a wait channel that isn't in any sleep queue.");
 
   struct thread *current_td;
   TAILQ_FOREACH(current_td, &sq->sq_blocked, td_sleepq_entry) {
