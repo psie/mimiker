@@ -15,7 +15,7 @@ static sleepq_chain_t sleepq_chains[SC_TABLESIZE];
 
 void sleepq_init() {
   memset(sleepq_chains, 0, sizeof sleepq_chains);
-  for (uint64_t i = 0; i < SC_TABLESIZE; i++)
+  for (int i = 0; i < SC_TABLESIZE; i++)
     LIST_INIT(&sleepq_chains[i].sc_queues);
 }
 
